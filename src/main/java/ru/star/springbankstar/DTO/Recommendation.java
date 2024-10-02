@@ -1,0 +1,71 @@
+package ru.star.springbankstar.DTO;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
+public class Recommendation {
+    private UUID id;
+    private String name;
+
+    private List<Product> recommendations;
+
+
+    public Recommendation(UUID id, String name, List<Product> recommendations) {
+        this.id = id;
+        this.name = name;
+        this.recommendations = recommendations;
+    }
+
+
+
+    public Recommendation() {
+    }
+
+    public List<Product> getRecommendations() {
+        return recommendations;
+    }
+
+    public void setRecommendations(List<Product> recommendations) {
+        this.recommendations = recommendations;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Recommendation that = (Recommendation) o;
+        return id == that.id && Objects.equals(name, that.name) && Objects.equals(recommendations, that.recommendations);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, recommendations);
+    }
+
+    @Override
+    public String toString() {
+        return "Recommendation{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", recommendations=" + recommendations +
+                '}';
+    }
+}
