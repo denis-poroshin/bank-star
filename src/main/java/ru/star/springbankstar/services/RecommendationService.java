@@ -6,8 +6,9 @@ import ru.star.springbankstar.DTO.Recommendation;
 import ru.star.springbankstar.interfaces.RecommendationRuleSet;
 import ru.star.springbankstar.repositorys.RecommendationsRepository;
 
-import java.util.Optional;
+import java.util.Collection;
 import java.util.UUID;
+
 
 @Service
 public class RecommendationService implements RecommendationRuleSet {
@@ -17,31 +18,29 @@ public class RecommendationService implements RecommendationRuleSet {
         this.recommendationsRepository = recommendationsRepository;
     }
 
-
+    /**
+     * Возваращает рекомендации для повльзователя
+     *
+     * @param idUser нужен для поиска по id пользоватлея
+     * Если для пользователя не будет рекомендаций, тогда ему придет пустой список
+     */
     @Override
     public Recommendation getRecommendation(UUID idUser) {
-        Optional<Product> transactionAmount = recommendationsRepository.getTransactionAmount(idUser);
-        if (transactionAmount.isPresent()) {
-            Recommendation recommendation = new Recommendation();
-            recommendation.setId(idUser);
-            recommendation.setName("dawd");
-            recommendation.setRecommendations(transactionAmount.stream().toList());
-            return recommendation;
-
-        }
-
-//        Recommendation recommendation = new Recommendation();
-//        recommendation.setId(transactionAmount.get().getId());
-//        recommendation.setName(transactionAmount.get().getName());
-
-//        return recommendation;
-
-        return null;
+        Collection<Product> info = recommendationsRepository.getTransactionAmount(idUser);
+        Recommendation recommendation = new Recommendation();
+        recommendation.setId(idUser);
+        recommendation.setRecommendations(info);
+        return recommendation;
     }
+
+    /*
+    Метод get необходим для проверки подключения к базе данных
+     */
 
     @Override
     public int get(UUID id) {
         return recommendationsRepository.getRandomTransactionAmount(id);
     }
+
 
 }

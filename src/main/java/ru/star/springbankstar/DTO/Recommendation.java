@@ -1,19 +1,15 @@
 package ru.star.springbankstar.DTO;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public class Recommendation {
     private UUID id;
-    private String name;
 
-    private List<Product> recommendations;
+    private Collection<Product> recommendations;
 
 
-    public Recommendation(UUID id, String name, List<Product> recommendations) {
+    public Recommendation(UUID id, List<Product> recommendations) {
         this.id = id;
-        this.name = name;
         this.recommendations = recommendations;
     }
 
@@ -22,11 +18,11 @@ public class Recommendation {
     public Recommendation() {
     }
 
-    public List<Product> getRecommendations() {
+    public Collection<Product> getRecommendations() {
         return recommendations;
     }
 
-    public void setRecommendations(List<Product> recommendations) {
+    public void setRecommendations(Collection<Product> recommendations) {
         this.recommendations = recommendations;
     }
 
@@ -38,13 +34,6 @@ public class Recommendation {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
 
     @Override
@@ -52,19 +41,18 @@ public class Recommendation {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Recommendation that = (Recommendation) o;
-        return id == that.id && Objects.equals(name, that.name) && Objects.equals(recommendations, that.recommendations);
+        return id == that.id && Objects.equals(recommendations, that.recommendations);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, recommendations);
+        return Objects.hash(id, recommendations);
     }
 
     @Override
     public String toString() {
         return "Recommendation{" +
                 "id=" + id +
-                ", name='" + name + '\'' +
                 ", recommendations=" + recommendations +
                 '}';
     }

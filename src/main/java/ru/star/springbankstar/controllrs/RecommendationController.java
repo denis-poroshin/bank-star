@@ -1,9 +1,11 @@
 package ru.star.springbankstar.controllrs;
 
 import org.springframework.web.bind.annotation.*;
+import ru.star.springbankstar.DTO.Product;
 import ru.star.springbankstar.DTO.Recommendation;
 import ru.star.springbankstar.interfaces.RecommendationRuleSet;
 
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,4 +29,5 @@ public class RecommendationController {
     public int test(@PathVariable UUID id) {
         return recommendationRuleSet.get(id);
     }
+
 }
