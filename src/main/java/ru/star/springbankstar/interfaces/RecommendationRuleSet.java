@@ -1,9 +1,7 @@
 package ru.star.springbankstar.interfaces;
 
-import ru.star.springbankstar.DTO.Product;
-import ru.star.springbankstar.DTO.Recommendation;
+import ru.star.springbankstar.ProductDto.Recommendation;
 
-import java.util.Collection;
 import java.util.UUID;
 
 public interface RecommendationRuleSet {

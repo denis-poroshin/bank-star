@@ -1,13 +1,9 @@
 package ru.star.springbankstar.controllrs;
 
 import org.springframework.web.bind.annotation.*;
-import ru.star.springbankstar.DTO.Product;
-import ru.star.springbankstar.DTO.Recommendation;
+import ru.star.springbankstar.ProductDto.Recommendation;
 import ru.star.springbankstar.interfaces.RecommendationRuleSet;
 
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController

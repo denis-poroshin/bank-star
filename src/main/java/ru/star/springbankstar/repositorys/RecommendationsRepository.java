@@ -2,13 +2,11 @@ package ru.star.springbankstar.repositorys;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-import ru.star.springbankstar.DTO.Product;
+import ru.star.springbankstar.ProductDto.Product;
 import ru.star.springbankstar.model.OfferDescriptionText;
 import ru.star.springbankstar.configurations.ProductRowMapper;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.UUID;
 
 

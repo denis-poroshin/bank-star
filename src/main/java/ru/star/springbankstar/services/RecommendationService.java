@@ -1,8 +1,8 @@
 package ru.star.springbankstar.services;
 
 import org.springframework.stereotype.Service;
-import ru.star.springbankstar.DTO.Product;
-import ru.star.springbankstar.DTO.Recommendation;
+import ru.star.springbankstar.ProductDto.Product;
+import ru.star.springbankstar.ProductDto.Recommendation;
 import ru.star.springbankstar.interfaces.RecommendationRuleSet;
 import ru.star.springbankstar.repositorys.RecommendationsRepository;
 

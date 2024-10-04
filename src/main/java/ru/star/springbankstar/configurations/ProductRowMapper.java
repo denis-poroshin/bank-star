@@ -1,7 +1,7 @@
 package ru.star.springbankstar.configurations;
 
 import org.springframework.jdbc.core.RowMapper;
-import ru.star.springbankstar.DTO.Product;
+import ru.star.springbankstar.ProductDto.Product;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

@@ -1,4 +1,4 @@
-package ru.star.springbankstar.DTO;
+package ru.star.springbankstar.ProductDto;
 
 import java.util.*;
 
