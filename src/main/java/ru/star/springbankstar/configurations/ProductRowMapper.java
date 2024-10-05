@@ -19,5 +19,6 @@ public class ProductRowMapper implements RowMapper<Product> {
         product.setText(rs.getString("SENTENCE_TEXT"));
         logger.info("Created product {}", product);
         return product;
+
     }
 }
