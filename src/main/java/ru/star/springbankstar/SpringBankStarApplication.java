@@ -8,8 +8,6 @@ public class SpringBankStarApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(SpringBankStarApplication.class, args);
-		System.out.println("asadfdf");
-		System.out.println("dawdawdaw");
 	}
 
 }
