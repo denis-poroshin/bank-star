@@ -30,6 +30,8 @@ public class RecommendationsRepository {
         return jdbcTemplate.query(sql, new ProductRowMapper(), offerDescriptionText.getTEXT_INVEST_500(), user, 1000);
     }
 
+    //test
+
     /*
     Реализовать еще 2 SQL запроса
 
