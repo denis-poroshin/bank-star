@@ -48,7 +48,6 @@ public class RecommendationsRepository {
                 "where t.type = 'WITHDRAW'" +
                 "AND TRANSACTIONS.USER_ID = ?";
 
-
         return jdbcTemplate.query(sql, new ProductRowMapper(), offerDescriptionText.getTOP_SAVING(), user, 1000);
     }
 
