@@ -30,6 +30,28 @@ public class RecommendationsRepository {
         return jdbcTemplate.query(sql, new ProductRowMapper(), offerDescriptionText.getTEXT_INVEST_500(), user, 1000);
     }
 
+    private Collection<Product> getTOP_SAVING(UUID user){
+        String sql = "SELECT TRANSACTIONS.PRODUCT_ID, TRANSACTIONS.USER_ID, TRANSACTIONS.TYPE, TRANSACTIONS.AMOUNT, PRODUCTS.TYPE" +
+                "FROM TRANSACTIONS" +
+                "INNER JOIN PRODUCTS ON TRANSACTIONS.PRODUCT_ID = PRODUCTS.ID" +
+                "WHERE PRODUCTS.TYPE = 'DEBIT'" +
+                "AND (SELECT SUM(AMOUNT) " +
+                "FROM TRANSACTIONS t " +
+                "WHERE t.type = 'DEPOSIT') >= 50000" +
+                "OR (SELECT SUM(AMOUNT) " +
+                "FROM TRANSACTIONS t " +
+                "WHERE PRODUCTS.TYPE = 'SAVING' >= 50000" +
+                "AND (SELECT SUM(AMOUNT) " +
+                "FROM TRANSACTIONS t " +
+                "WHERE t.TYPE = 'DEPOSIT') > (SELECT SUM(AMOUNT) " +
+                "FROM TRANSACTIONS t " +
+                "where t.type = 'WITHDRAW'" +
+                "AND TRANSACTIONS.USER_ID = ?";
+
+
+        return jdbcTemplate.query(sql, new ProductRowMapper(), offerDescriptionText.getTOP_SAVING(), user, 1000);
+    }
+
     //test
 
     /*
