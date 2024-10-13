@@ -3,6 +3,7 @@ package ru.star.springbankstar.repositorys;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.star.springbankstar.ProductDto.Product;
+import ru.star.springbankstar.entity.Rules;
 import ru.star.springbankstar.model.OfferDescriptionText;
 import ru.star.springbankstar.configurations.ProductRowMapper;
 
@@ -14,47 +15,12 @@ import java.util.UUID;
 public class RecommendationsRepository {
     private final JdbcTemplate jdbcTemplate;
     private final OfferDescriptionText offerDescriptionText = new OfferDescriptionText();
-//
-//    private static final String TEXT_INVEST_500 = "Откройте свой путь к успеху с индивидуальным инвестиционным " +
-//            "счетом (ИИС) от нашего банка! Воспользуйтесь налоговыми льготами и начните инвестировать " +
-//            "с умом. Пополните счет до конца года и получите выгоду в виде вычета на взнос в следующем " +
-//            "налоговом периоде. Не упустите возможность разнообразить свой портфель, снизить риски и " +
-//            "следить за актуальными рыночными тенденциями. Откройте ИИС сегодня и станьте ближе к финансовой независимости!";
-//
-//    private static final String TEXT_TOP_SAVING = "Откройте свою собственную «Копилку» с нашим банком! «Копилка» — это уникальный " +
-//            "банковский инструмент, который поможет вам легко и удобно накапливать деньги на важные цели. Больше никаких " +
-//            "забытых чеков и потерянных квитанций — всё под контролем!" +
-//            "Преимущества «Копилки»:" +
-//            "Накопление средств на конкретные цели. Установите лимит и срок накопления, и банк будет автоматически " +
-//            "переводить определенную сумму на ваш счет." +
-//            "Прозрачность и контроль. Отслеживайте свои доходы и расходы, контролируйте процесс накопления и корректируйте" +
-//            " стратегию при необходимости." +
-//            "Безопасность и надежность. Ваши средства находятся под защитой банка, а доступ к ним возможен только через " +
-//            "мобильное приложение или интернет-банкинг.\n" +
-//            "Начните использовать «Копилку» уже сегодня и станьте ближе к своим финансовым целям!";
-//
-//
-//
-//    private static final String TEXT_SIMPLE_LOAN = "Откройте мир выгодных кредитов с нами!" +
-//            "Ищете способ быстро и без лишних хлопот получить нужную сумму? Тогда наш выгодный " +
-//            "кредит — именно то, что вам нужно! Мы предлагаем низкие процентные ставки, гибкие условия и индивидуальный " +
-//            "подход к каждому клиенту." +
-//            "Почему выбирают нас:" +
-//            "Быстрое рассмотрение заявки. Мы ценим ваше время, поэтому процесс рассмотрения заявки занимает всего несколько часов." +
-//            "Удобное оформление. Подать заявку на кредит можно онлайн на нашем сайте или в мобильном приложении." +
-//            "Широкий выбор кредитных продуктов. Мы предлагаем кредиты на различные цели: покупку недвижимости, автомобиля, " +
-//            "образование, лечение и многое другое." +
-//            "Не упустите возможность воспользоваться выгодными условиями кредитования от нашей компании!";
+    private final RecommendationRulesRepository rulesRepository;
 
 
-    public RecommendationsRepository(JdbcTemplate jdbcTemplate) {
+    public RecommendationsRepository(JdbcTemplate jdbcTemplate, RecommendationRulesRepository rulesRepository) {
         this.jdbcTemplate = jdbcTemplate;
-    }
-    public int getRandomTransactionAmount(UUID user){
-        Integer result = jdbcTemplate.queryForObject(
-                "SELECT amount FROM transactions t WHERE t.user_id = ? LIMIT 1",
-                Integer.class, user);
-        return result != null ? result : 0;
+        this.rulesRepository = rulesRepository;
     }
 
     public Collection<Product> getTransactionAmount(UUID user){
@@ -65,6 +31,12 @@ public class RecommendationsRepository {
         products = getTopSaving(user);
         return !products.isEmpty() ? products : getSimpleLoan(user);
 
+    }
+    public int getRandomTransactionAmount(UUID user){
+        Integer result = jdbcTemplate.queryForObject(
+                "SELECT amount FROM transactions t WHERE t.user_id = ? LIMIT 1",
+                Integer.class, user);
+        return result != null ? result : 0;
     }
 
     private Collection<Product> getInvest500(UUID user){
@@ -112,6 +84,45 @@ public class RecommendationsRepository {
                 "GROUP BY p.NAME;";
 
         return jdbcTemplate.query(sql, new ProductRowMapper(), user, offerDescriptionText.getTEXT_SIMPLE_LOAN());
+    }
+    private Collection<Product> getSimpleLoanDynamic(UUID user){
+        Rules userOf = rulesRepository.findByQuery("USER_OF");
+        Rules transactionSumCompareDepositWithdraw = rulesRepository.findByQuery("TRANSACTION_SUM_COMPARE_DEPOSIT_WITHDRAW");
+        Rules transactionSumCompare = rulesRepository.findByQuery("TRANSACTION_SUM_COMPARE");
+        String[] argumentsTransactionSumCompareDepositWithdraw = transactionSumCompareDepositWithdraw.getArguments().split(", ");
+        String[] argumentsTransactionSumCompare = transactionSumCompare.getArguments().split(", ");
+
+        String sql = "WITH TransactionSums AS ( " +
+                "SELECT " +
+                "    SUM(CASE WHEN t.TYPE = 'DEPOSIT' THEN t.AMOUNT ELSE 0 END) AS total_deposit, " +
+                "    SUM(CASE WHEN t.TYPE = 'WITHDRAW' THEN t.AMOUNT ELSE 0 END) AS total_withdraw " +
+                "    SUM(CASE WHEN t.TYPE = ? THEN t.AMOUNT ELSE 0 END) AS total " +
+                "FROM TRANSACTIONS t " +
+                "WHERE t.USER_ID = ? " +
+                ") " +
+                "SELECT p.ID, p.NAME, ? AS SENTENCE_TEXT " +
+                "FROM PRODUCTS p " +
+                ", TransactionSums ts " +
+                "WHERE p.TYPE = ? " +
+                "AND (p.TYPE = ? AND ts.total_deposit ? ts.total_withdraw) " +
+                "AND (p.TYPE = ? AND ts.total ? ?) " +
+                "GROUP BY p.NAME;";
+        return jdbcTemplate.query(sql,
+                new ProductRowMapper(),
+                argumentsTransactionSumCompare[1],
+                user,
+                offerDescriptionText.getTEXT_SIMPLE_LOAN(),
+                userOf.getArguments(),
+                argumentsTransactionSumCompareDepositWithdraw[0],
+                argumentsTransactionSumCompareDepositWithdraw[1],
+                argumentsTransactionSumCompare[0],
+                argumentsTransactionSumCompare[2],
+                argumentsTransactionSumCompare[3]
+                );
+
+
+
+
     }
 
 }

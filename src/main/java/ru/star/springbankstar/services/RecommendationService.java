@@ -30,6 +30,10 @@ public class RecommendationService implements RecommendationRuleSet {
         Recommendation recommendation = new Recommendation();
         recommendation.setId(idUser);
         recommendation.setRecommendations(info);
+        /*
+        дописать репозиторий, чтобы сохраняло rulse
+         */
+//        recommendation.setRules();
         return recommendation;
     }
 
