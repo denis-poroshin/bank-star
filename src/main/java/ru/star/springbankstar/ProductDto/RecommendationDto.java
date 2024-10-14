@@ -4,20 +4,20 @@ import org.apache.tomcat.util.digester.Rule;
 
 import java.util.*;
 
-public class Recommendation {
+public class RecommendationDto {
     private UUID id;
 
-    private Collection<Product> recommendations;
+    private Collection<ProductDto> recommendations;
 
     private Collection<Rule> rules;
 
-    public Recommendation(UUID id, Collection<Product> recommendations, Collection<Rule> rules) {
+    public RecommendationDto(UUID id, Collection<ProductDto> recommendations, Collection<Rule> rules) {
         this.id = id;
         this.recommendations = recommendations;
         this.rules = rules;
     }
 
-    public Recommendation() {
+    public RecommendationDto() {
     }
 
     public UUID getId() {
@@ -28,11 +28,11 @@ public class Recommendation {
         this.id = id;
     }
 
-    public Collection<Product> getRecommendations() {
+    public Collection<ProductDto> getRecommendations() {
         return recommendations;
     }
 
-    public void setRecommendations(Collection<Product> recommendations) {
+    public void setRecommendations(Collection<ProductDto> recommendations) {
         this.recommendations = recommendations;
     }
 
@@ -48,7 +48,7 @@ public class Recommendation {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Recommendation that = (Recommendation) o;
+        RecommendationDto that = (RecommendationDto) o;
         return Objects.equals(id, that.id) && Objects.equals(recommendations, that.recommendations) && Objects.equals(rules, that.rules);
     }
 

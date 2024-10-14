@@ -1,8 +1,8 @@
 package ru.star.springbankstar.controllrs;
 
 import org.springframework.web.bind.annotation.*;
-import ru.star.springbankstar.ProductDto.Recommendation;
-import ru.star.springbankstar.interfaces.RecommendationRuleSet;
+import ru.star.springbankstar.ProductDto.RecommendationDto;
+import ru.star.springbankstar.interfaces.Recommendation;
 
 import java.util.UUID;
 
@@ -10,14 +10,14 @@ import java.util.UUID;
 @RequestMapping("/recommendation")
 public class RecommendationController {
 
-    private final RecommendationRuleSet recommendationRuleSet;
+    private final Recommendation recommendationRuleSet;
 
-    public RecommendationController(RecommendationRuleSet recommendationRuleSet) {
+    public RecommendationController(Recommendation recommendationRuleSet) {
         this.recommendationRuleSet = recommendationRuleSet;
     }
 
     @GetMapping("/{id}")
-    public Recommendation getRecommendation(@PathVariable UUID id) {
+    public RecommendationDto getRecommendation(@PathVariable UUID id) {
         return recommendationRuleSet.getRecommendation(id);
 
     }

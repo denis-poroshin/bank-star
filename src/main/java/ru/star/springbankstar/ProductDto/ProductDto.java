@@ -3,12 +3,12 @@ package ru.star.springbankstar.ProductDto;
 import java.util.Objects;
 import java.util.UUID;
 
-public class Product {
+public class ProductDto {
     private UUID id;
     private String name;
     private String text;
 
-    public Product(UUID id, String name, String text) {
+    public ProductDto(UUID id, String name, String text) {
         this.id = id;
         this.name = name;
         this.text = text;
@@ -27,7 +27,7 @@ public class Product {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Product product = (Product) o;
+        ProductDto product = (ProductDto) o;
         return Objects.equals(id, product.id) && Objects.equals(name, product.name) && Objects.equals(text, product.text);
     }
 
@@ -44,7 +44,7 @@ public class Product {
         this.text = text;
     }
 
-    public Product() {
+    public ProductDto() {
     }
 
     public UUID getId() {

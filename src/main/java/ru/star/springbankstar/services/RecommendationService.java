@@ -1,9 +1,10 @@
 package ru.star.springbankstar.services;
 
 import org.springframework.stereotype.Service;
-import ru.star.springbankstar.ProductDto.Product;
-import ru.star.springbankstar.ProductDto.Recommendation;
-import ru.star.springbankstar.interfaces.RecommendationRuleSet;
+import ru.star.springbankstar.ProductDto.ProductDto;
+import ru.star.springbankstar.ProductDto.RecommendationDto;
+import ru.star.springbankstar.interfaces.Recommendation;
+import ru.star.springbankstar.repositorys.DynamicRecommendationRepository;
 import ru.star.springbankstar.repositorys.RecommendationsRepository;
 
 import java.util.Collection;
@@ -11,11 +12,13 @@ import java.util.UUID;
 
 
 @Service
-public class RecommendationService implements RecommendationRuleSet {
+public class RecommendationService implements Recommendation {
     private final RecommendationsRepository recommendationsRepository;
+    private final DynamicRecommendationRepository dynamicRecommendationRepository;
 
-    public RecommendationService(RecommendationsRepository recommendationsRepository) {
+    public RecommendationService(RecommendationsRepository recommendationsRepository, DynamicRecommendationRepository dynamicRecommendationRepository) {
         this.recommendationsRepository = recommendationsRepository;
+        this.dynamicRecommendationRepository = dynamicRecommendationRepository;
     }
 
     /**
@@ -25,15 +28,14 @@ public class RecommendationService implements RecommendationRuleSet {
      * Если для пользователя не будет рекомендаций, тогда ему придет пустой список
      */
     @Override
-    public Recommendation getRecommendation(UUID idUser) {
-        Collection<Product> info = recommendationsRepository.getTransactionAmount(idUser);
-        Recommendation recommendation = new Recommendation();
+    public RecommendationDto getRecommendation(UUID idUser) {
+        Collection<ProductDto> dynamicTransactionAmount = dynamicRecommendationRepository.getTransactionAmount(idUser);
+        Collection<ProductDto> transactionAmount = recommendationsRepository.getTransactionAmount(idUser);
+        transactionAmount.addAll(dynamicTransactionAmount);
+
+        RecommendationDto recommendation = new RecommendationDto();
         recommendation.setId(idUser);
-        recommendation.setRecommendations(info);
-        /*
-        дописать репозиторий, чтобы сохраняло rulse
-         */
-//        recommendation.setRules();
+        recommendation.setRecommendations(transactionAmount);
         return recommendation;
     }
 
