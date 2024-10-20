@@ -1,25 +1,37 @@
 package ru.star.springbankstar.repositorys;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.star.springbankstar.ProductDto.ProductDto;
 import ru.star.springbankstar.configurations.ProductRowMapper;
+import ru.star.springbankstar.createSql.CreateSql;
 import ru.star.springbankstar.entity.Rules;
+import ru.star.springbankstar.entity.TotalRule;
 import ru.star.springbankstar.model.OfferDescriptionText;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Repository
 public class DynamicRecommendationRepository {
     private final JdbcTemplate jdbcTemplate;
     private final OfferDescriptionText offerDescriptionText = new OfferDescriptionText();
     private final RecommendationRulesRepository rulesRepository;
+    private final TotalRuleRepository totalRuleRepository;
+    private final CreateSql createSql;
+    private Logger logger = LoggerFactory.getLogger(DynamicRecommendationRepository.class);
 
-    public DynamicRecommendationRepository(JdbcTemplate jdbcTemplate, RecommendationRulesRepository rulesRepository) {
+
+    public DynamicRecommendationRepository(JdbcTemplate jdbcTemplate, RecommendationRulesRepository rulesRepository, TotalRuleRepository totalRuleRepository, CreateSql createSql) {
         this.jdbcTemplate = jdbcTemplate;
         this.rulesRepository = rulesRepository;
+        this.totalRuleRepository = totalRuleRepository;
+        this.createSql = createSql;
     }
     public Collection<ProductDto> getTransactionAmount(UUID user){
         Collection<ProductDto> products = getInvest500Dynamic(user);
@@ -31,94 +43,53 @@ public class DynamicRecommendationRepository {
 
     }
     private Collection<ProductDto> getInvest500Dynamic(UUID user){
-        Optional<Rules> userOf = rulesRepository.findByQuery("USER_OF");
-        Optional<Rules> transactionSumCompareDepositWithdraw = rulesRepository.findByQuery("TRANSACTION_SUM_COMPARE_DEPOSIT_WITHDRAW");
-        String[] argumentsTransactionSumCompareDepositWithdraw = transactionSumCompareDepositWithdraw.get().getArguments().split(", ");
-
-        String sql = "SELECT p.id, p.name, ? AS SENTENCE_TEXT FROM transactions t " +
-                "JOIN products p ON t.type = ? AND p.type IN ('SAVING') " +
-                "WHERE t.user_id = ? GROUP BY p.name HAVING SUM(t.amount) ? ?";
-        return jdbcTemplate.query(sql,
-                new ProductRowMapper(),
-                offerDescriptionText.getTEXT_INVEST_500(),
-                userOf.get().getArguments(),
-                user,
-                argumentsTransactionSumCompareDepositWithdraw[0],
-                argumentsTransactionSumCompareDepositWithdraw[1]);
-
-
+        String qetInvest500Dynamic = createSql.createQetInvest500Dynamic(user);
+        return jdbcTemplate.query(qetInvest500Dynamic, new ProductRowMapper());
     }
 
-    private Collection<ProductDto> getTopSavingDynamic(UUID user){
-        Optional<Rules> userOf = rulesRepository.findByQuery("USER_OF");
-        Optional<Rules> transactionSumCompare = rulesRepository.findByQuery("TRANSACTION_SUM_COMPARE");
-        String[] argumentsTransactionSumCompare = transactionSumCompare.get().getArguments().split(", ");
-
-        String sql = "WITH TransactionSums AS ( " +
-                "SELECT " +
-                "    SUM(CASE WHEN t.TYPE = ? THEN t.AMOUNT ELSE 0 END) AS total_deposit, " +
-                "    SUM(CASE WHEN t.TYPE = 'WITHDRAW' THEN t.AMOUNT ELSE 0 END) AS total_withdraw " +
-                "FROM TRANSACTIONS t " +
-                "WHERE t.USER_ID = ? " +
-                ") " +
-                "SELECT p.ID, p.NAME, ? AS SENTENCE_TEXT " +
-                "FROM PRODUCTS p " +
-                ", TransactionSums ts " +
-                "WHERE p.TYPE = ? " +
-                "AND ((ts.total_deposit ? ?) OR (p.TYPE = 'SAVING' AND ts.total_deposit ? ?)) " +
-                "AND (ts.total_deposit > ts.total_withdraw) " +
-                "GROUP BY p.NAME;";
-
-        return jdbcTemplate.query(sql,
-                new ProductRowMapper(),
-                argumentsTransactionSumCompare[1],
-                user,
-                offerDescriptionText.getTEXT_TOP_SAVING(),
-                userOf.get().getArguments(),
-                argumentsTransactionSumCompare[2],
-                argumentsTransactionSumCompare[3],
-                argumentsTransactionSumCompare[2],
-                argumentsTransactionSumCompare[3]
-                );
+    private Collection<ProductDto> getTopSavingDynamic(UUID user) {
+        String topSavingDynamic = createSql.createTopSavingDynamic(user);
+        return jdbcTemplate.query(topSavingDynamic, new ProductRowMapper());
     }
+
+
 
     private Collection<ProductDto> getSimpleLoanDynamic(UUID user){
-        Optional<Rules> userOf = rulesRepository.findByQuery("USER_OF");
-        Optional<Rules> transactionSumCompareDepositWithdraw = rulesRepository.findByQuery("TRANSACTION_SUM_COMPARE_DEPOSIT_WITHDRAW");
-        Optional<Rules> transactionSumCompare = rulesRepository.findByQuery("TRANSACTION_SUM_COMPARE");
-        String[] argumentsTransactionSumCompareDepositWithdraw = transactionSumCompareDepositWithdraw.get().getArguments().split(", ");
-        String[] argumentsTransactionSumCompare = transactionSumCompare.get().getArguments().split(", ");
+        String simpleLoanDynamic = createSql.createSimpleLoanDynamic(user);
+        return jdbcTemplate.query(simpleLoanDynamic, new ProductRowMapper());
 
-        String sql = "WITH TransactionSums AS ( " +
-                "SELECT " +
-                "    SUM(CASE WHEN t.TYPE = 'DEPOSIT' THEN t.AMOUNT ELSE 0 END) AS total_deposit, " +
-                "    SUM(CASE WHEN t.TYPE = 'WITHDRAW' THEN t.AMOUNT ELSE 0 END) AS total_withdraw " +
-                "    SUM(CASE WHEN t.TYPE = ? THEN t.AMOUNT ELSE 0 END) AS total " +
-                "FROM TRANSACTIONS t " +
-                "WHERE t.USER_ID = ? " +
-                ") " +
-                "SELECT p.ID, p.NAME, ? AS SENTENCE_TEXT " +
-                "FROM PRODUCTS p " +
-                ", TransactionSums ts " +
-                "WHERE p.TYPE = ? " +
-                "AND (p.TYPE = ? AND ts.total_deposit ? ts.total_withdraw) " +
-                "AND (p.TYPE = ? AND ts.total ? ?) " +
-                "GROUP BY p.NAME;";
-        return jdbcTemplate.query(sql,
-                new ProductRowMapper(),
-                argumentsTransactionSumCompare[1],
-                user,
-                offerDescriptionText.getTEXT_SIMPLE_LOAN(),
-                userOf.get().getArguments(),
-                argumentsTransactionSumCompareDepositWithdraw[0],
-                argumentsTransactionSumCompareDepositWithdraw[1],
-                argumentsTransactionSumCompare[0],
-                argumentsTransactionSumCompare[2],
-                argumentsTransactionSumCompare[3]
-        );
-
-
+    }
+    private void examinationTotalRule(Optional<Rules> rules){
+        boolean result = totalRules(rules.get());
+        if (result){
+            logger.info("Правило было найдено и увеличин счетчик на +1");
+        }else {
+            totalRules(rules.get());
+            logger.info("Счетчик правил был создан и увеличелся на +1");
+        }
 
 
     }
+    private boolean totalRules(Rules rules) {
+        boolean flag = false;
+        List<TotalRule> allTotalRule = totalRuleRepository.findAll();
+        for (int i = 0; i < allTotalRule.size(); i++) {
+            if (allTotalRule.get(i).getRuleId().getId().equals(rules.getId())){
+                Long total = allTotalRule.get(i).getTotal();
+                allTotalRule.get(i).setTotal(++total);
+                return flag = true;
+            }
+
+        }
+        return flag;
+    }
+
+    private void createTotalRule(Rules rules) {
+        AtomicReference<TotalRule> totalRule = new AtomicReference<>(new TotalRule());
+        totalRule.get().setRuleId(rules);
+        totalRule.get().setTotal(1L);
+
+    }
+
+
 }
