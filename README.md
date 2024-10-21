@@ -35,7 +35,7 @@
 
 ![image](https://github.com/user-attachments/assets/7208e51a-b764-4df6-a7a8-3fe20ae94bff)
 
-<h2>Сборка проекта.</h2>
+<h2>Сборка проекта</h2>
 В правом верхнем углу требуется нажать на букву m. В spring-bank-star требуется нажать на clean, а потом на package. Это сначала  очистит папку target, а потом соберет проект в jar фал.
 
 ![image](https://github.com/user-attachments/assets/bc1a002f-ce44-41b4-b89c-16a85237b3e6)
